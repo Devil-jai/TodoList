@@ -1,50 +1,56 @@
-const express = require('express')
-const mongoose = require('mongoose')
-const cors = require('cors')
-const TodoModel = require('./Models/Todo')
-const path = require("path")
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const TodoModel = require('./Models/Todo');
+const path = require('path');
 
-const app = express()
-app.use(cors())
-app.use(express.json()) 
 
-mongoose.connect('mongodb://localhost:27017/todolist')
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-app.get('/get',(req,res)=>{
-    TodoModel.find()
-    .then(result=>res.json(result))
-    .catch(err => console.log(err))
-})
+// Use the MongoDB Atlas connection string from the environment variable
+const mongoURI = "mongodb+srv://deviljai1999:jU2QGQ0Lrph4Gigw@cluster0.al2sted.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0/todo";
+mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected'))
+  .catch(err => console.log(err));
 
-app.post('/add',(req,res)=>{
-    const task = req.body.task
-    TodoModel.create({
-        task:task
-    }).then(result => res.json(result))
-    .catch(err => res.json(err))
+// Define routes
+app.get('/get', (req, res) => {
+  TodoModel.find()
+    .then(result => res.json(result))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
-})
+app.post('/add', (req, res) => {
+  const task = req.body.task;
+  TodoModel.create({ task })
+    .then(result => res.json(result))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
-app.put('/update/:id',(req,res)=>{
-    const {id} = req.params;
-    // console.log("sdklfj",id);
-    TodoModel.findByIdAndUpdate({_id:id},{done:true})
-    .then(result=>res.json(result))
-    .catch(err=>res.json(err))
-})
+app.put('/update/:id', (req, res) => {
+  const { id } = req.params;
+  TodoModel.findByIdAndUpdate(id, { done: true }, { new: true })
+    .then(result => res.json(result))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
-app.delete('/delete/:id',(req,res)=>{
-    const {id} = req.params;
-    TodoModel.findByIdAndDelete({_id:id})
-    .then(result=>res.json(result))
-    .catch(err=>res.json(err))
-})
+app.delete('/delete/:id', (req, res) => {
+  const { id } = req.params;
+  TodoModel.findByIdAndDelete(id)
+    .then(result => res.json(result))
+    .catch(err => res.status(500).json({ error: err.message }));
+});
 
-app.get("/",(req,res)=>{
-    app.use(express.static(path.resolve(__dirname,"todolist","build")))
-    res.sendFile(path.resolve(__dirname,"todolist","build","index.html"))
-})
+// Serve static files from the React build directory
+app.use(express.static(path.resolve(__dirname, 'todolist', 'build')));
 
-app.listen(1000,() =>{
-    console.log("Server is Running");
-})
+app.get("/", (req, res) => {
+  res.sendFile(path.resolve(__dirname, 'todolist', 'build', 'index.html'));
+});
+
+// Start the server
+app.listen(1000, () => {
+  console.log("Server is Running");
+});
