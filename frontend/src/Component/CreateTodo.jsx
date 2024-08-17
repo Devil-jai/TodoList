@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-const url = "http://localhost:4000";
+const url = "https://todolist-b05t.onrender.com";
 
 function CreateTodo() {
   const [addtask, setaddTask] = useState();
