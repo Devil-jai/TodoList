@@ -9,7 +9,7 @@ app.use(express.json())
 const port = process.env.PORT || 4000;
 const url = process.env.MONGODB_URL;
 const corsOptions = {
-    origin:"http://localhost:3000"
+    origin:"https://todolist-frontend-gkdl.onrender.com"
 }
 
 app.use(cors(corsOptions))
